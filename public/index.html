@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مُنزّل الفيديوهات والصوتيات الذكي</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-badge">⚡ مجاني وبدون إعلانات • دعم القص واختيار الجودة</div>
+      <h1>مُنزّل الفيديوهات والصوتيات</h1>
+      <p class="subtitle">قم بلصق رابط أي فيديو واستعرض المدة، الحجم المقابل لكل دقة، الوقت المتوقع، مع إمكانية اقتطاع جزء محدد</p>
+    </header>
+
+    <!-- URL Input Section -->
+    <section class="card input-card">
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          id="urlInput" 
+          placeholder="ضع رابط الفيديو هنا (YouTube, TikTok, Instagram, Facebook, X...)" 
+          autocomplete="off"
+        />
+        <button id="pasteBtn" class="btn-paste" title="لصق من الحافظة">📋 لصق</button>
+      </div>
+      <button id="checkBtn" class="btn btn-primary">
+        <span class="btn-icon">🔍</span>
+        <span class="btn-text">فحص الفيديو والجودات</span>
+      </button>
+      <div id="statusMessage" class="status-msg hidden"></div>
+    </section>
+
+    <!-- Video Info & Quality Options Card -->
+    <section id="resultsSection" class="card results-card hidden">
+      <div class="video-preview-header">
+        <div class="thumb-wrapper">
+          <img id="videoThumb" src="" alt="غلاف الفيديو">
+          <span id="videoDuration" class="duration-badge">00:00</span>
+        </div>
+        <div class="video-meta">
+          <h2 id="videoTitle">عنوان الفيديو</h2>
+          <p class="channel-name" id="videoUploader">اسم القناة</p>
+          
+          <!-- Detailed Arabic Duration & Smart Category -->
+          <div class="duration-highlight-row">
+            <div class="duration-pill">
+              <span>⏱️ المدة: </span>
+              <strong id="videoDurationArabic">--</strong>
+            </div>
+            <div id="videoCategoryBadge" class="category-badge">🎬 مقطع عادي</div>
+          </div>
+
+          <div class="tags-row">
+            <span class="tag">محلي وآمن</span>
+            <span class="tag">دمج صوت وصورة FFmpeg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trimming / Cutting Section -->
+      <div class="trim-box">
+        <div class="trim-toggle-row">
+          <label class="trim-toggle-label">
+            <input type="checkbox" id="trimCheckbox">
+            <span class="trim-toggle-title">✂️ ميزة قص واقتطاع جزء محدد من الفيديو (اختياري)</span>
+          </label>
+          <span class="trim-badge">يوفر الوقت والمساحة</span>
+        </div>
+        <div id="trimControls" class="trim-controls hidden">
+          <p class="trim-hint">حدد وقت البداية والنهاية لتحميل هذا الجزء فقط (أو أزل التحديد لتحميل المقطع كاملاً):</p>
+          <div class="trim-fields">
+            <div class="time-input-group">
+              <label for="trimStartTime">من (البداية):</label>
+              <input type="text" id="trimStartTime" placeholder="00:00" value="00:00">
+            </div>
+            <div class="time-input-group">
+              <label for="trimEndTime">إلى (النهاية):</label>
+              <input type="text" id="trimEndTime" placeholder="01:30">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qualities-container">
+        <h3 class="section-title">
+          <span>اختر الجودة المطلوبة</span>
+          <small>يظهر الحجم والوقت المتوقع للتنزيل</small>
+        </h3>
+
+        <!-- Audio Only Box -->
+        <div class="audio-box" id="audioOptionBox">
+          <div class="audio-info">
+            <div class="icon-circle">🎵</div>
+            <div>
+              <div class="quality-name" id="audioTitle">صوت فقط (MP3 عالي الجودة)</div>
+              <div class="quality-sub">استخراج وتحويل الصوت بأعلى نقاء</div>
+            </div>
+          </div>
+          <div class="size-and-action">
+            <div class="size-meta-column">
+              <div class="size-badge" id="audioSize">-- MB</div>
+              <div class="time-estimate-badge" id="audioTimeEst">~ثوانٍ معدودة</div>
+            </div>
+            <button class="btn btn-audio download-trigger" id="downloadAudioBtn">
+              تحميل الصوت MP3
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Qualities Table / Grid -->
+        <div class="qualities-table-wrapper">
+          <table class="qualities-table">
+            <thead>
+              <tr>
+                <th>الجودة والدقة</th>
+                <th>الصيغة</th>
+                <th>حجم التنزيل المقابل</th>
+                <th>الوقت التقريبي للتنزيل</th>
+                <th>تحميل</th>
+              </tr>
+            </thead>
+            <tbody id="qualitiesTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Download Progress Card -->
+    <section id="progressSection" class="card progress-card hidden">
+      <div class="progress-header">
+        <div class="spinner" id="downloadSpinner"></div>
+        <div>
+          <h3 id="progressTitle">جاري تنزيل المقطع...</h3>
+          <p id="progressSubtitle" class="text-muted">الرجاء الانتظار، يتم جلب البيانات</p>
+        </div>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+      </div>
+
+      <div class="progress-stats">
+        <div>النسبة: <strong id="statPercent">0%</strong></div>
+        <div>الحجم: <strong id="statSize">--</strong></div>
+        <div>السرعة: <strong id="statSpeed">--</strong></div>
+        <div>المتبقي: <strong id="statEta">--</strong></div>
+      </div>
+
+      <div class="progress-actions">
+        <button id="openFolderBtn" class="btn btn-secondary">
+          📂 فتح مجلد التنزيلات
+        </button>
+      </div>
+    </section>
+
+    <!-- Recently Downloaded Files -->
+    <section class="card history-card">
+      <div class="history-header">
+        <h3>📂 الملفات الموجودة في مجلد التنزيلات</h3>
+        <button id="openFolderDirectBtn" class="btn btn-sm btn-outline">
+          فتح المجلد في ويندوز
+        </button>
+      </div>
+      <div id="filesList" class="files-list">
+        <div class="empty-state">لا توجد ملفات محملة بعد، الصق رابطاً وابدأ التنزيل!</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>تعمل الأداة محلياً على جهازك بواسطة <strong>yt-dlp</strong> و <strong>FFmpeg</strong> وبدون أي خوادم خارجية.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
